@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="토토 캐릭터">
+  <circle cx="60" cy="60" r="58" fill="#FFF3C4"/>
+  <path d="M27 40 C18 20 34 14 40 34 Z" fill="#E7AA00"/>
+  <path d="M93 40 C102 20 86 14 80 34 Z" fill="#E7AA00"/>
+  <circle cx="60" cy="66" r="34" fill="#FFC107"/>
+  <circle cx="48" cy="62" r="4.5" fill="#111"/>
+  <circle cx="72" cy="62" r="4.5" fill="#111"/>
+  <path d="M52 78 Q60 86 68 78" stroke="#111" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="60" cy="72" rx="5" ry="4" fill="#111"/>
+  <circle cx="40" cy="74" r="5" fill="#FFB74D" opacity=".7"/>
+  <circle cx="80" cy="74" r="5" fill="#FFB74D" opacity=".7"/>
+</svg>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://luke777-cpu.github.io/toto-creative/sitemap.xml
