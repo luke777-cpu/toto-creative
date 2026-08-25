@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>가현이 아빠 포인트 챌린지</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#fff8ef;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#2e2a26}
+    .status{position:sticky;top:0;z-index:20;background:rgba(255,248,239,.96);backdrop-filter:blur(10px);border-bottom:1px solid #eadfd3;padding:10px 12px;box-shadow:0 4px 14px #5a3b220f}
+    .status-inner{max-width:720px;margin:auto;display:flex;align-items:center;gap:10px;justify-content:space-between}
+    .score-wrap{display:flex;align-items:baseline;gap:8px;min-width:0}
+    .label{font-size:13px;color:#766a61;font-weight:700}
+    .saved-score{font-size:24px;font-weight:900;color:#6d4c35;white-space:nowrap}
+    .meta{font-size:12px;color:#8b7d72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .reset{border:0;border-radius:10px;padding:9px 11px;background:#f2e5d6;color:#5b3d2b;font-weight:800;white-space:nowrap}
+    iframe{display:block;width:100%;height:calc(100vh - 64px);border:0;background:#fff8ef}
+    .done{color:#2e7d32}
+  </style>
+</head>
+<body>
+  <div class="status">
+    <div class="status-inner">
+      <div class="score-wrap">
+        <div>
+          <div class="label">가현이 저장 점수</div>
+          <div><span id="savedScore" class="saved-score">200P</span> <span id="done" class="meta"></span></div>
+        </div>
+      </div>
+      <button id="reset" class="reset" type="button">새로 시작</button>
+    </div>
+  </div>
+  <iframe id="game" src="family-challenge-gahyun.html" title="가현이 가족 아빠 포인트 챌린지"></iframe>
+
+  <script>
+    const KEY='toto.gahyun.challenge.v1';
+    const frame=document.getElementById('game');
+    const savedScore=document.getElementById('savedScore');
+    const done=document.getElementById('done');
+
+    function loadState(){
+      try{return JSON.parse(localStorage.getItem(KEY))||{score:200,finished:false,updatedAt:null}}
+      catch(e){return{score:200,finished:false,updatedAt:null}}
+    }
+    function saveState(patch={}){
+      const next={...loadState(),...patch,updatedAt:new Date().toISOString()};
+      localStorage.setItem(KEY,JSON.stringify(next));
+      render(next);
+      return next;
+    }
+    function render(state=loadState()){
+      savedScore.textContent=(Number.isFinite(Number(state.score))?Number(state.score):200)+'P';
+      done.textContent=state.finished?'✓ 최종 점수 저장됨':'진행 중 자동 저장';
+      done.className='meta'+(state.finished?' done':'');
+    }
+    function getFrameScore(doc){
+      const el=doc.getElementById('score');
+      const n=el?parseInt(el.textContent,10):NaN;
+      return Number.isFinite(n)?n:loadState().score;
+    }
+
+    render();
+
+    frame.addEventListener('load',()=>{
+      const win=frame.contentWindow;
+      const doc=frame.contentDocument;
+      if(!win||!doc)return;
+
+      const state=loadState();
+      try{
+        win.eval('s='+Math.max(0,Math.min(200,Number(state.score)||200))+';');
+        const scoreEl=doc.getElementById('score');
+        const fsEl=doc.getElementById('fs');
+        if(scoreEl)scoreEl.textContent=state.score;
+        if(fsEl)fsEl.textContent=state.score;
+      }catch(e){}
+
+      const originalHint=win.hint;
+      if(typeof originalHint==='function'){
+        win.hint=function(i){
+          originalHint.call(win,i);
+          setTimeout(()=>saveState({score:getFrameScore(doc),finished:false}),0);
+        };
+      }
+
+      const originalFinish=win.finish;
+      if(typeof originalFinish==='function'){
+        win.finish=function(){
+          originalFinish.call(win);
+          setTimeout(()=>saveState({score:getFrameScore(doc),finished:true}),0);
+        };
+      }
+
+      const scoreEl=doc.getElementById('score');
+      if(scoreEl){
+        new MutationObserver(()=>saveState({score:getFrameScore(doc)})).observe(scoreEl,{childList:true,characterData:true,subtree:true});
+      }
+    });
+
+    document.getElementById('reset').addEventListener('click',()=>{
+      if(!confirm('가현이 점수 기록을 지우고 200점부터 다시 시작할까요?'))return;
+      localStorage.removeItem(KEY);
+      render();
+      frame.src='family-challenge-gahyun.html?reset='+Date.now();
+    });
+  </script>
+</body>
+</html>
