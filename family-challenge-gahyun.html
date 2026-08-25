@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>아빠의 편지를 열어라 - 박가현</title>
+<style>
+  :root{--bg:#fff8ef;--card:#ffffff;--ink:#2e2a26;--muted:#756b63;--accent:#8b5e3c;--line:#eadfD3;--good:#2e7d32;--bad:#b3261e;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:linear-gradient(#fffaf3,#f7efe4);color:var(--ink)}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 80px}
+  .hero,.card,.letter{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 10px 28px rgba(60,35,15,.08)}
+  .hero{padding:28px 22px;text-align:center}
+  h1{margin:0 0 12px;font-size:30px}
+  .badge{display:inline-block;padding:7px 12px;border-radius:999px;background:#f3e6d7;font-weight:700;margin-bottom:14px}
+  .score{font-size:42px;font-weight:800;margin:10px 0 0}
+  .sub{color:var(--muted);line-height:1.65}
+  .card{padding:22px;margin-top:18px}
+  .qtitle{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .level{font-size:13px;font-weight:800;padding:5px 9px;border-radius:999px;background:#f5eee6}
+  .question{font-size:20px;font-weight:750;line-height:1.5;margin:18px 0}
+  input{width:100%;padding:15px 14px;border:1px solid #d9cec3;border-radius:12px;font-size:17px;outline:none}
+  input:focus{border-color:#9d7557;box-shadow:0 0 0 3px rgba(157,117,87,.12)}
+  button{border:0;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}
+  .primary{width:100%;margin-top:12px;background:#6d4c35;color:#fff}
+  .hintBtn{margin-top:12px;background:#f3e6d7;color:#5b3d2b;width:100%}
+  .hintBtn:disabled{opacity:.55;cursor:not-allowed}
+  .msg{margin-top:12px;font-weight:700;min-height:24px}
+  .good{color:var(--good)} .bad{color:var(--bad)}
+  .timer{font-variant-numeric:tabular-nums;color:#7c6756;font-weight:700;margin-top:10px}
+  .hint{margin-top:12px;padding:14px;border-radius:12px;background:#fff7e7;border:1px dashed #d5b98f;display:none}
+  .rules{margin-top:18px;text-align:left;line-height:1.7}
+  .rules li{margin:6px 0}
+  .next{margin-top:18px;padding:18px;border-radius:16px;background:#f7f1ea;text-align:center}
+  .locked{opacity:.55;pointer-events:none}
+  .letter{display:none;margin-top:22px;padding:26px 22px;line-height:2;background:#fffdf9}
+  .letter h2{text-align:center;margin-top:0}
+  .signature{text-align:right;font-weight:800;margin-top:24px}
+  .final{display:none;text-align:center;margin-top:22px}
+  .rank{font-size:36px;font-weight:900;margin:10px 0}
+  .tiny{font-size:13px;color:var(--muted)}
+  @media (max-width:480px){h1{font-size:27px}.question{font-size:18px}.score{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="badge">🔐 가족 아빠 포인트 챌린지</div>
+    <h1>아빠의 편지를 열어라</h1>
+    <p class="sub"><strong>오늘의 도전자는 박가현입니다.</strong><br>가족 누구나 도전할 수 있지만, 한 번에 한 명씩만 도전합니다.</p>
+    <div class="score"><span id="score">200</span>P</div>
+    <div class="tiny">최대 아빠 포인트</div>
+    <div class="rules">
+      <strong>게임 규칙</strong>
+      <ul>
+        <li>총 3문제, 만점 200점.</li>
+        <li>1번은 쉬움. 2번과 3번은 각각 5분 동안 생각할 수 있습니다.</li>
+        <li>5분이 지나면 힌트 버튼이 열립니다.</li>
+        <li>힌트를 사용할 때마다 30점 감점됩니다.</li>
+        <li>3문제를 모두 풀면 아빠의 편지가 열립니다.</li>
+        <li>아빠 포인트 사용처: 현금, 아빠 카드 찬스, 가족 게임머니 등.</li>
+      </ul>
+    </div>
+    <div class="next">⏭️ 다음 주 도전자: <strong>박지용</strong><br><span class="tiny">지용이의 문제와 편지는 다음 주 공개</span></div>
+    <div id="jsStatus" class="tiny" style="margin-top:10px">⚠️ 게임 엔진 준비 중...</div>
+  </section>
+
+  <section class="card" id="q1card">
+    <div class="qtitle"><strong>1번 문제</strong><span class="level">EASY · 40P</span></div>
+    <div class="question">가현이가 어릴 때 가장 좋아했던 캐릭터 장난감은?</div>
+    <input id="q1" placeholder="정답 입력" autocomplete="off" />
+    <button class="primary" id="btnQ1">정답 확인</button>
+    <div id="m1" class="msg"></div>
+  </section>
+
+  <section class="card locked" id="q2card">
+    <div class="qtitle"><strong>2번 문제</strong><span class="level">NORMAL · 70P</span></div>
+    <div class="question">아빠가 가현이를 어떤 꽃에 비유했을까?</div>
+    <div id="t2" class="timer">1번 문제를 맞히면 타이머가 시작됩니다.</div>
+    <input id="q2" placeholder="정답 입력" autocomplete="off" />
+    <button class="primary" id="btnQ2">정답 확인</button>
+    <button id="h2" class="hintBtn" disabled>💡 힌트 보기 (-30P)</button>
+    <div id="hint2" class="hint">🌹 힌트: <strong>장미를 닮은 꽃</strong></div>
+    <div id="m2" class="msg"></div>
+  </section>
+
+  <section class="card locked" id="q3card">
+    <div class="qtitle"><strong>3번 문제</strong><span class="level">HARD · 90P</span></div>
+    <div class="question">아빠가 가현이에게 바라는 두 가지. ‘지혜’와 또 하나는?</div>
+    <div id="t3" class="timer">2번 문제를 맞히면 타이머가 시작됩니다.</div>
+    <input id="q3" placeholder="정답 입력" autocomplete="off" />
+    <button class="primary" id="btnQ3">정답 확인</button>
+    <button id="h3" class="hintBtn" disabled>💡 힌트 보기 (-30P)</button>
+    <div id="hint3" class="hint">💪 힌트: <strong>한번 마음먹은 일을 쉽게 놓지 않는 힘. 두 글자.</strong></div>
+    <div id="m3" class="msg"></div>
+  </section>
+
+  <section id="final" class="card final">
+    <div>🔓 3개의 자물쇠가 모두 열렸습니다.</div>
+    <div class="rank"><span id="finalScore">200</span>P</div>
+    <div id="finalMsg" class="sub"></div>
+    <button class="primary" id="btnLetter">❤️ 아빠의 편지 열기</button>
+  </section>
+
+  <article id="letter" class="letter">
+    <h2>큰딸 가현이 — 찔레꽃 같은 아이</h2>
+    <p>공부 말고는 뭐든 잘하는 가현이.</p>
+    <p>아빠가 너를 꽃에 비유한다면, 너는 장미보다는 <strong>찔레꽃 같은 아이</strong>다.</p>
+    <p>화려하고 사람들의 눈길을 한몸에 받는 장미를 좇아가기도 했지만, 이상하게 늘 장미에게 한 발 밀려 있는 것처럼 보였다. 그런데 아빠는 이제 안다. 찔레꽃은 장미가 되지 못한 꽃이 아니라는 것을.</p>
+    <p>찔레꽃은 아무 데서나 자라는 것 같아도 제 힘으로 뿌리를 내리고, 누가 돌봐주지 않아도 때가 되면 꽃을 피운다. 화려하지 않아도 오래 바라보면 정이 가고, 가까이 다가가면 자기만의 향기가 있다.</p>
+    <p>가현이가 꼭 그렇다.</p>
+    <p>어린 시절부터 너는 참 희한한 재주가 있었다. 놀 수 있는 환경이 생기면 괜히 주변 눈치를 보면서 기회를 날리는 아이가 아니었다. 그런 여유와 생존력은 누가 가르친다고 생기는 게 아니다. 타고나는 거다.</p>
+    <p>그런데 하필이면 아빠를 닮은 것도 있다. 특히 경제관념까지 아빠 것을 물려받은 것 같아 그게 제일 걱정이다.</p>
+    <p>그래도 아빠는 안다. 가현이에게는 <strong>지혜로움과 집념</strong>이 있다.</p>
+    <p>살다 보면 공부 잘하는 것보다 훨씬 중요한 순간들이 온다. 사람을 알아보는 눈, 넘어졌을 때 다시 일어나는 힘, 내가 원하는 것이 무엇인지 알아채는 감각, 그리고 한번 마음먹은 것을 끝까지 붙잡는 힘. 그런 것으로 세상을 살아갔으면 좋겠다.</p>
+    <p>이제 서른이 되면 아빠가 너에게 바라는 것도 조금 달라진다.</p>
+    <p><strong>하고 싶은 일이 있었으면 좋겠다.</strong><br>남들이 좋다고 하는 일이 아니라 네가 정말 하고 싶은 일.</p>
+    <p><strong>갖고 싶은 것도 있었으면 좋겠다.</strong><br>그것을 가지려고 땀 흘리고 기다려보기도 했으면 좋겠다.</p>
+    <p>그리고 무엇보다 <strong>바라고 싶은 것이 있는 사람이었으면 좋겠다.</strong></p>
+    <p>꼭 성공하지 않아도 된다. 남들보다 앞서가지 않아도 된다.</p>
+    <p><strong>장미가 되려고 애쓰지 마라.<br>찔레꽃은 찔레꽃으로도 충분히 아름답다.</strong></p>
+    <p>가현이는 그냥 가현이답게 살았으면 좋겠다.</p>
+    <p>아빠가 물려준 좋지 않은 것들은 적당히 버리고, 좋은 것만 골라 가져가라. 그리고 네가 가진 지혜와 집념으로 네 세상을 만들어라.</p>
+    <div class="signature">— 아빠가</div>
+  </article>
+</div>
+<script>
+let score=200;
+let q1done=false,q2done=false,q3done=false;
+let hintUsed={2:false,3:false};
+let timers={};
+function norm(s){return (s||'').trim().replace(/\s+/g,'').toLowerCase();}
+function setScore(v){score=Math.max(0,v);document.getElementById('score').textContent=score;document.getElementById('finalScore').textContent=score;}
+function startTimer(q){
+  let left=300; const t=document.getElementById('t'+q), b=document.getElementById('h'+q);
+  clearInterval(timers[q]);
+  const paint=()=>{const m=String(Math.floor(left/60)).padStart(2,'0'),s=String(left%60).padStart(2,'0');t.textContent=`생각할 시간 ${m}:${s}`;};
+  paint();
+  timers[q]=setInterval(()=>{left--;paint();if(left<=0){clearInterval(timers[q]);t.textContent='5분이 지났습니다. 필요하면 힌트를 사용하세요.';b.disabled=false;}},1000);
+}
+function submitQ1(){
+  if(q1done) return;
+  const a=norm(document.getElementById('q1').value);
+  const ok = a.includes('곰돌이푸') || a.includes('곰돌이푸우') || a==='푸' || a==='푸우' || a==='winniethepooh' || a==='winnie-the-pooh';
+  const m=document.getElementById('m1');
+  if(ok){
+    q1done=true;
+    m.className='msg good';
+    m.textContent='정답! 🍯 1번 자물쇠가 열렸습니다. 2번 문제로 이동합니다.';
+    const q2=document.getElementById('q2card');
+    q2.classList.remove('locked');
+    q2.style.opacity='1';
+    q2.style.pointerEvents='auto';
+    startTimer(2);
+    setTimeout(()=>q2.scrollIntoView({behavior:'smooth',block:'start'}),250);
+  }else{
+    m.className='msg bad';
+    m.textContent='아쉽습니다. “곰돌이 푸”처럼 입력해보세요.';
+  }
+}
+function submitQ2(){
+  if(!q1done)return;
+  const ok=['찔레꽃','찔레'].includes(norm(document.getElementById('q2').value));
+  const m=document.getElementById('m2');
+  if(ok){q2done=true;clearInterval(timers[2]);m.className='msg good';m.textContent='정답! 🌿 2번 자물쇠가 열렸습니다.';document.getElementById('q3card').classList.remove('locked');startTimer(3);document.getElementById('q3card').scrollIntoView({behavior:'smooth'});}else{m.className='msg bad';m.textContent='아직 아닙니다. 천천히 생각해보세요.';}
+}
+function submitQ3(){
+  if(!q2done)return;
+  const ok=norm(document.getElementById('q3').value)==='집념';
+  const m=document.getElementById('m3');
+  if(ok){q3done=true;clearInterval(timers[3]);m.className='msg good';m.textContent='정답! 💪 마지막 자물쇠가 열렸습니다.';finish();}else{m.className='msg bad';m.textContent='아직 아닙니다. 가현이에게 있는 힘을 떠올려보세요.';}
+}
+function useHint(q){
+  if(hintUsed[q])return;
+  hintUsed[q]=true;setScore(score-30);
+  document.getElementById('hint'+q).style.display='block';
+  document.getElementById('h'+q).disabled=true;
+  document.getElementById('h'+q).textContent='힌트 사용 완료 (-30P)';
+}
+function finish(){
+  const f=document.getElementById('final'); f.style.display='block';
+  let msg='';
+  if(score>=170)msg='역시 내 딸이다. 👑';
+  else if(score>=100)msg='이 정도면 딸 인정. 😎';
+  else if(score>0)msg='그래도 끝까지 풀었으니 인정. 🙂';
+  else msg='우리 처음부터 다시 알아가자. 😂';
+  document.getElementById('finalMsg').textContent=msg+' 이제 진짜 선물, 아빠의 편지를 열어보세요.';
+  f.scrollIntoView({behavior:'smooth'});
+}
+function openLetter(){
+  const l=document.getElementById('letter');l.style.display='block';l.scrollIntoView({behavior:'smooth'});
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const status=document.getElementById('jsStatus');
+  if(status){ status.textContent='✅ 게임 엔진 정상 작동 중'; status.style.color='#2e7d32'; }
+  document.getElementById('btnQ1').addEventListener('click', submitQ1);
+  document.getElementById('btnQ2').addEventListener('click', submitQ2);
+  document.getElementById('btnQ3').addEventListener('click', submitQ3);
+  document.getElementById('h2').addEventListener('click', ()=>useHint(2));
+  document.getElementById('h3').addEventListener('click', ()=>useHint(3));
+  document.getElementById('btnLetter').addEventListener('click', openLetter);
+  ['q1','q2','q3'].forEach((id,i)=>{
+    document.getElementById(id).addEventListener('keydown',e=>{
+      if(e.key==='Enter'){ e.preventDefault(); [submitQ1,submitQ2,submitQ3][i](); }
+    });
+  });
+});
+</script>
+</body>
+</html>
